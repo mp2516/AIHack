@@ -6,7 +6,7 @@ import shapefile
 from matplotlib import pyplot as plt
 from kmeans import KMeans2D
 
-baseDir = 'data/california/california/train'
+baseDir = 'C:\\Users\\18072\\PycharmProjects\\AIHack'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
 counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
@@ -17,6 +17,7 @@ coords = []
 inc = []
 
 # Plot california
+# the 13th state in the us_shape is california
 california_shape = us_sf.shape(13)
 x_cali = np.zeros((len(california_shape.points), 1))
 y_cali = np.zeros((len(california_shape.points), 1))
@@ -37,11 +38,11 @@ for i in trange(int(len(ca_sf.shapes()))):
     coords.append((float(ca_sf.record(i)[-1]), float(ca_sf.record(i)[-2])))
     inc.append(income)
 
-km = KMeans2D(coords, 15)
-km.iterate(50)
-for i in range(15):
-    plt.scatter(km.get_x_cluster(i), km.get_y_cluster(i), label=f"Cluster {i}")
-plt.legend()
-plt.show()
+# km = KMeans2D(coords, 15)
+# km.iterate(50)
+# for i in range(15):
+#     plt.scatter(km.get_x_cluster(i), km.get_y_cluster(i), label=f"Cluster {i}")
+# plt.legend()
+# plt.show()
 
 # print(race_data['GEOID'])
