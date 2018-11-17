@@ -1,15 +1,18 @@
 import numpy as np
 from tqdm import trange
 
+
 def distance_sq(a, b):
     """
     It does what it says on the tin
     """
     # ARE YOU HAPPY NOW?
-    return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
+    if len(a) != len(b):
+        raise ValueError("A and b must have identical dimensions")
+    return sum(((a[i] - b[i])**2 for i in range(len(a))))
 
 
-class KMeans2D:
+class KMeans:
     class Point:
         def __init__(self, location, cluster):
             self.cluster = cluster
@@ -21,20 +24,23 @@ class KMeans2D:
         def y(self):
             return self.location[1]
 
+        def __len__(self):
+            return len(self.location)
+
         def __getitem__(self, item):
             return self.location[item]
 
-    def __init__(self, coordinates, num_clusters):
+    def __init__(self, coordinates, num_clusters,weights):
+        self.dims = len(coordinates[0])
         self.num_clusters = num_clusters
         self.points = []
         self.cluster_centroids = []
-        self.minx = min(coordinates[0])
-        self.maxx = max(coordinates[0])
-        self.miny = min(coordinates[1])
-        self.maxy = max(coordinates[1])
+        self.normalization = []
         for cluster in range(num_clusters):
-            self.cluster_centroids.append(
-                (np.random.uniform(self.minx, self.maxx), np.random.uniform(self.miny, self.maxy)))
+            cluster_p = []
+            for d in range(self.dims):
+                cluster_p.append(np.random.uniform(0, 1))
+            self.cluster_centroids.append(cluster_p)
 
         for point in coordinates:
             min_dist = np.inf
@@ -57,13 +63,15 @@ class KMeans2D:
         for cluster in range(self.num_clusters):
             if self.get_num_points(cluster) == 0:
                 continue
-            xSum, ySum = 0, 0
+            sm = [0 for i in range(self.dims)]
 
             for point in self.get_cluster_points(cluster):
-                xSum += point.x()
-                ySum += point.y()
-
-            self.cluster_centroids[cluster] = (xSum / self.get_num_points(cluster), ySum / self.get_num_points(cluster))
+                for i in range(self.dims):
+                    sm[i] += point[i]
+            d = []
+            for i in range(self.dims):
+                d.append(sm[i]/self.get_num_points(cluster))
+            self.cluster_centroids[cluster] =d
 
     def assign_clusters(self):
         for point in self.points:
@@ -78,8 +86,8 @@ class KMeans2D:
 
     def iterate(self, iterations=1):
         for i in trange(iterations):
-            self.relocate_centroids()
             self.assign_clusters()
+            self.relocate_centroids()
 
     def get_x_cluster(self, cluster):
         return [p.x() for p in self.points if p.cluster == cluster]
