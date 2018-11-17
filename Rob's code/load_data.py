@@ -8,28 +8,31 @@ from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
 from sklearn.preprocessing import StandardScaler
 
-baseDir = 'data/california/california/train'
+baseDir = '../data/california/california/train'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
 counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
-ca_sf = shapefile.Reader('data/tl_2018_06_tract')
+ca_sf = shapefile.Reader('../data/tl_2018_06_tract')
 
 data = []
 
+
 def plot_california_counties():
-    ca_counties_sf = shapefile.Reader('data/tl_2016_06_cousub/tl_2016_06_cousub')
+    ca_counties_sf = shapefile.Reader('../data/tl_2018_us_county')
     for i in range(len(ca_counties_sf.shapes())):
+        if (ca_counties_sf.record(i)[0] != '06'): continue
         county_shape = ca_counties_sf.shape(i)
-        x_points = np.zeros((len(county_shape.points),1))
-        y_points = np.zeros((len(county_shape.points),1))
+        x_points = np.zeros((len(county_shape.points), 1))
+        y_points = np.zeros((len(county_shape.points), 1))
         for j in range(len(county_shape.points)):
             x_points[j] = county_shape.points[j][0]
             y_points[j] = county_shape.points[j][1]
-        plt.plot(x_points,y_points,'k')
+        plt.plot(x_points, y_points, 'k')
+
 
 def plot_california():
     # Plot california
-    us_sf = shapefile.Reader('data/tl_2018_us_state')
+    us_sf = shapefile.Reader('../data/tl_2018_us_state')
     california_shape = us_sf.shape(13)
     x_cali = np.zeros((len(california_shape.points), 1))
     y_cali = np.zeros((len(california_shape.points), 1))
@@ -64,7 +67,7 @@ else:
         tdf.write(str(data))
 
 print(len(data))
-plt.figure(figsize=(6,8))
+plt.figure(figsize=(6, 8))
 plot_california_counties()
 scaler = StandardScaler()
 income = np.array([data[i]['income'] for i in range(len(data))])
