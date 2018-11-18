@@ -21,32 +21,26 @@ def calculate_distance(location_1, location_2):
 def calculate_all_distances(Jobs, Workers):
     all_nodes = np.concatenate((Jobs, Workers))
     dimension = len(all_nodes)
+
+    all_coords = np.zeros((dimension, 3))
+    for i in range(0, dimension):
+        all_coords[i,0] = all_nodes[i,0]
+        all_coords[i,1] = all_nodes[i,1]
+        all_coords[i,2] = 0 #all_nodes[i,2] #This needs to go back in
+
     all_distances = np.zeros((dimension, dimension))
     for i in range(0, dimension):
         for j in range(i + 1, dimension):
             all_distances[i][j] = calculate_distance(all_nodes[i], all_nodes[j])
-    return all_distances
-
+    return all_distances, all_coords
 
 # Mimimum Spanning Tree
 
 def min_span_tree(Jobs, Workers):
-    all_distances = calculate_all_distances(Jobs, Workers)
+    all_distances, all_coords = calculate_all_distances(Jobs, Workers)
     Tcsr = minimum_spanning_tree(all_distances)
-    return Tcsr.toarray().astype(int)
+    return Tcsr.toarray().astype(int), all_coords
 
-
-# Jobs = [
-#     [12.34, 34.65, 0.3],
-#     [34.57, 23.76, 0.4],
-#     [23.56, 29.86, 0.3]]
-#
-# Workers = [
-#     [12.34, 32.65, 0.1],
-#     [39.57, 21.76, 0.2],
-#     [37.57, 26.76, 0.4],
-#     [34.57, 27.76, 0.4],
-#     [21.56, 32.86, 0.3]]
 
 ######### FLOW NETWORK: FORD FOLKERSON
 
