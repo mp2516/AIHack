@@ -22,7 +22,7 @@ def calculate_all_distances(Jobs, Workers):
     all_nodes = np.concatenate((Jobs, Workers))
     dimension = len(all_nodes)
 
-    all_coords = np.zeros(dimension, 3)
+    all_coords = np.zeros((dimension, 3))
     for i in range(0, dimension):
         all_coords[i,0] = all_nodes[i,0]
         all_coords[i,1] = all_nodes[i,1]

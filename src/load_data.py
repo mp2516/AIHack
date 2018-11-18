@@ -127,7 +127,7 @@ n_o_j = np.array([jobs_data[i]['Number of Jobs'] for i in range(len(jobs_data))]
 n_o_j_scale = scaler.fit_transform(n_o_j.reshape(-1, 1))
 subset = [(jobs_data[i]['coord'][0], jobs_data[i]['coord'][1], n_o_j_scale[i]) for i in range(len(jobs_data))]
 print(scaler.transform(subset))
-n_clusters = 30
+n_clusters = 100
 job_kmeans = KMeans(n_clusters=n_clusters)
 job_kmeans.fit(subset)
 emp_end_df = pd.read_csv('../data_employment/Employment_Education_status.csv')
@@ -136,13 +136,13 @@ emp_edu = np.array([empl_data[i]['Enployment/Education Status'] for i in range(l
 empl_data_scale = scaler.fit_transform(emp_edu.reshape(-1, 1))
 subset_empl_edu = [(empl_data[i]['coord'][0], empl_data[i]['coord'][1], empl_data_scale[i][0]) for i in
                    range(len(empl_data))]
-print(subset_empl_edu)
 empl_edu_kmean = KMeans(n_clusters=n_clusters)
 empl_edu_kmean.fit(subset_empl_edu)
 
 jobs_centres = job_kmeans.cluster_centers_
 emp_edu_centres = empl_edu_kmean.cluster_centers_
 result, all_coords = min_span_tree(jobs_centres, emp_edu_centres)
+print(all_coords)
 plot_california()
 for i in range(len(result)):
     for j in range(len(result[i])):
