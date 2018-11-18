@@ -11,10 +11,9 @@ from sklearn.preprocessing import StandardScaler
 baseDir = '../data/california/california/train'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
-counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
-ca_sf = shapefile.Reader('../data/tl_2018_06_tract')
 
-data = []
+counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
+ca_tract_sf = shapefile.Reader('../data/tl_2018_06_tract')
 
 
 def plot_california_counties():
@@ -44,54 +43,101 @@ def plot_california():
     plt.scatter(x_cali, y_cali, s=0.2)
 
 
-if os.path.exists('d_processed.txt'):
-    with open('d_processed.txt') as tdf:
-        data = ast.literal_eval(tdf.read())
+def process_county_data(ca_sf, col_label, col_label_verbose, df, path='dc_processed.txt', intrinsic=True):
+    """
+    Function for processing county data - more zoomed out than tract dataset - use interpolation if not intrisinic
+    :param ca_sf:
+    :param col_label:
+    :param col_label_verbos:
+    :param df:
+    :param path:
+    :param intrinsic:
+    :return:
+    """
+    population_data = pd.read_csv(os.path.join(baseDir, 'X00_COUNTS.csv'))
+    population_data = population_data[['GEOID', 'B00001e1', 'B00001m1']]
+    data = []
+    if not intrinsic:
+        county_pop = {}
+        for c_G_ID in df['GEOID']:
+            county_df = population_data[population_data['GEOID'].str.contains(c_G_ID, na=True)]
 
-else:
-    for i in trange(int(len(ca_sf.shapes()))):
-        ca_tract_shape = ca_sf.shape(i)
-        GEOID = ca_sf.record(i)[3]
-        tract_df = counts_data[counts_data['GEOID'].str.contains(GEOID, na=True)]
-        if len(tract_df['B19013e1']) == 0:
-            continue
-        tract_data = {'coord': (float(ca_sf.record(i)[-1]), float(ca_sf.record(i)[-2])), 'GEOID': GEOID}
-        # print(tract_df['B19013e1'])
-        income = tract_df['B19013e1'].mean(skipna=True)
-        if math.isnan(income):
-            continue
-        tract_data['income'] = income
+            county_pop[c_G_ID] = county_df['B00001e1'].sum(skipna=True)
+    for tract_id in trange(len(ca_sf.shapes())):
+        GEOID = ca_sf.record(tract_id)[3]
+        county_GEOID = GEOID[:5]
+        tract_df = df[df['GEOID'] == f"15000US{county_GEOID}"]
+        tract_data = {'coord': (float(ca_sf.record(tract_id)[-1]), float(ca_sf.record(tract_id)[-2])),
+                      'GEOID': GEOID}
+        if not intrinsic:
+            tract_pop = population_data[population_data['GEOID'].str.contains(GEOID, na=True)]['B00001e1'].sum(
+                skipna=True)
+            tract_data[col_label_verbose] = float(tract_df[col_label].iloc[0].replace(',','')) * (tract_pop / county_pop[f"15000US{county_GEOID}"])
+        else:
+            tract_data[col_label_verbose] = tract_df[col_label].iloc[0]
         data.append(tract_data)
+    return data
 
-    with open('d_processed.txt', 'w') as tdf:
-        tdf.write(str(data))
 
-print(len(data))
-plt.figure(figsize=(6, 8))
+def process_data(ca_sf, col_label, col_label_verbose, df, path='d_processed.txt'):
+    data = []
+    if os.path.exists(path):
+        with open(path) as tdf:
+            data = ast.literal_eval(tdf.read())
+            return data
+    else:
+        for i in trange(int(len(ca_sf.shapes()))):
+            GEOID = ca_sf.record(i)[3]
+            tract_df = df[df['GEOID'].str.contains(GEOID, na=True)]
+            if len(tract_df[col_label]) == 0:
+                continue
+            tract_data = {'coord': (float(ca_sf.record(i)[-1]), float(ca_sf.record(i)[-2])), 'GEOID': GEOID}
+            avg_param = tract_df[col_label].mean(skipna=True)
+            if math.isnan(avg_param):
+                continue
+            tract_data[col_label_verbose] = avg_param
+            data.append(tract_data)
+
+        with open(path, 'w') as tdf:
+            tdf.write(str(data))
+    return data
+
+
+jobs_employment = pd.read_csv('../jobs_data/Jobs_employment_2.csv', delimiter=';')
+data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment,intrinsic=False)
+print(data)
 plot_california_counties()
-scaler = StandardScaler()
-income = np.array([data[i]['income'] for i in range(len(data))])
-income_scale = scaler.fit_transform(income.reshape(-1, 1))
-subset = [(data[i]['coord'][0], data[i]['coord'][1], income_scale[i]) for i in range(len(data))]
-print(scaler.transform(subset))
-km = KMeans(n_clusters=10, ).fit_predict(scaler.transform(subset))
-
-for i in range(10):
-    mean_income = np.mean([income[j] for j in range(len(income)) if km[j] == i])
-    plt.scatter([subset[j][0] for j in range(len(subset)) if km[j] == i],
-                [subset[j][1] for j in range(len(subset)) if km[j] == i],
-                label=f"Cluster {i} -  Mean Income:${mean_income:.2f}",
-                s=10)
-plt.xlim((-120, -116))
-plt.ylim((33, 35))
-plt.axis('equal')
-plt.legend()
+plt.scatter([data[i]['coord'][0] for i in range(len(data))],[data[i]['coord'][1] for i in range(len(data))],c = [data[i]['Number of Jobs'] for i in range(len(data))],s=5)
 plt.show()
-# km.iterate(100)
-# plot_california()
-# for i in range(km.num_clusters):
-#     plt.scatter(km.get_x_cluster(i), km.get_y_cluster(i), label=f"Cluster {i}")
+#
+# data = process_data(ca_tract_sf, 'B19013e1', 'income', counts_data)
+# plt.figure(figsize=(6, 8))
+# plot_california_counties()
+# scaler = StandardScaler()
+# income = np.array([data[i]['income'] for i in range(len(data))])
+# income_scale = scaler.fit_transform(income.reshape(-1, 1))
+# subset = [(data[i]['coord'][0], data[i]['coord'][1], income_scale[i]) for i in range(len(data))]
+# print(scaler.transform(subset))
+# n_clusters = 6
+# kmeans = KMeans(n_clusters=n_clusters)
+# km = kmeans.fit_predict(scaler.transform(subset))
+#
+# for i in range(n_clusters):
+#     mean_income = np.mean([income[j] for j in range(len(income)) if km[j] == i])
+#     plt.scatter([subset[j][0] for j in range(len(subset)) if km[j] == i],
+#                 [subset[j][1] for j in range(len(subset)) if km[j] == i],
+#                 label=f"Mean Income:${mean_income:.2f}",
+#                 s=5)
+# plt.xlim((-120, -116))
+# plt.ylim((33, 35))
+# plt.axis('equal')
 # plt.legend()
 # plt.show()
-#
-# # print(race_data['GEOID'])
+# # km.iterate(100)
+# # plot_california()
+# # for i in range(km.num_clusters):
+# #     plt.scatter(km.get_x_cluster(i), km.get_y_cluster(i), label=f"Cluster {i}")
+# # plt.legend()
+# # plt.show()
+# #
+# # # print(race_data['GEOID'])

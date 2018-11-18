@@ -1,4 +1,3 @@
-Column1;Column2;Column3
 Counties;GEOID;Number of Jobs
 Alameda;15000US06001;758,255
 Alpine;15000US06003;601
@@ -58,8 +57,3 @@ Tuolumne;15000US06109;17,743
 Ventura;15000US06111;316,763
 Yolo;15000US06113;103,225
 Yuba;15000US06115;17,421
-;;
-;;
-;;
-;;
-;; 
