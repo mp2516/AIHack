@@ -9,11 +9,11 @@ from sklearn.cluster.k_means_ import KMeans
 from sklearn.preprocessing import StandardScaler
 from Route_Algo import min_span_tree
 
-baseDir = '../data/california/california/train'
+baseDir = '../data'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
 
-counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
+# counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
 ca_tract_sf = shapefile.Reader('../data/tl_2018_06_tract')
 
 
@@ -142,7 +142,7 @@ empl_edu_kmean.fit(subset_empl_edu)
 
 jobs_centres = job_kmeans.cluster_centers_
 emp_edu_centres = empl_edu_kmean.cluster_centers_
-result= min_span_tree(jobs_centres, emp_edu_centres)
+result = min_span_tree(jobs_centres, emp_edu_centres)
 plot_california()
 for i in range(len(result)):
     for j in range(len(result[i])):
