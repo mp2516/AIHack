@@ -7,7 +7,7 @@ import shapefile
 from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
 from sklearn.preprocessing import StandardScaler
-
+from .Route_Algo import min_span_tree
 baseDir = '../data/california/california/train'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))

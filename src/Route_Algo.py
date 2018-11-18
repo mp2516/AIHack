@@ -15,11 +15,6 @@ def calculate_distance(location_1, location_2):
     p = 0.017453292519943295  # Pi/180
     a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
     return 12742 * asin(sqrt(a))
-<<<<<<< Updated upstream
-    # return np.sqrt((location_1[0] - location_2[0]) ** 2 + (location_1[1] - location_2[1]) ** 2)
-
-=======
->>>>>>> Stashed changes
 
 def calculate_all_distances(Jobs, Workers):
     all_nodes = Jobs + Workers
@@ -32,54 +27,23 @@ def calculate_all_distances(Jobs, Workers):
 
 # Mimimum Spanning Tree
 
-<<<<<<< Updated upstream
-def kruskal_heap(G):
-    T = set()  # MST as a set of edges
-    subgraphs = {u: {u} for u in range(len(G))}  # Initialize subgraphs
-    E = [(G[u][v], u, v) for u in range(len(G)) for v in G[u]]  # List of edges with weight
-    heapify(E)
-    while len(T) < len(G) - 1:
-        _, u, v = heappop(E)  # Smallest edge
-        if subgraphs[u].intersection(subgraphs[v]) == set():  # Smallest edge is not in subgraphs
-            T.add((u, v))
-            subgraphs[u] = subgraphs[u].union(subgraphs[v])
-            subgraphs[v] = subgraphs[v].union(subgraphs[u])
-    return T
-
-
-bos, dfw, jfk, lax, mia, ordd, sfo, bwi, pvd = range(9)
-g1 = [
-    {sfo: 2704, ordd: 867, jfk: 187, mia: 1258},  # BOS
-    {sfo: 1464, lax: 1235, ordd: 802, mia: 1121},  # DFW
-    {ordd: 740, mia: 1090},  # JFK
-    {sfo: 337, mia: 2342},  # LAX
-    {},  # MIA
-    {sfo: 1846},  # ORD
-    {}  # SFO
-]
-=======
->>>>>>> Stashed changes
-
 def min_span_tree(Jobs, Workers):
     all_distances = calculate_all_distances(Jobs, Workers)
     Tcsr = minimum_spanning_tree(all_distances)
     Tcsr.toarray().astype(int)
-    print(Tcsr)
+    return Tcsr
 
-Jobs = [
-    [12.34, 34.65, 0.3],
-    [34.57, 23.76, 0.4],
-    [23.56, 29.86, 0.3]]
-
-Workers = [
-    [12.34, 32.65, 0.1],
-    [39.57, 21.76, 0.2],
-    [37.57, 26.76, 0.4],
-    [34.57, 27.76, 0.4],
-    [21.56, 32.86, 0.3]]
-
-result = min_span_tree(Jobs,Workers)
-print(result)
+# Jobs = [
+#     [12.34, 34.65, 0.3],
+#     [34.57, 23.76, 0.4],
+#     [23.56, 29.86, 0.3]]
+#
+# Workers = [
+#     [12.34, 32.65, 0.1],
+#     [39.57, 21.76, 0.2],
+#     [37.57, 26.76, 0.4],
+#     [34.57, 27.76, 0.4],
+#     [21.56, 32.86, 0.3]]
 
 ######### FLOW NETWORK: FORD FOLKERSON
 
