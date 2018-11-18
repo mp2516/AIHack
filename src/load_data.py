@@ -7,7 +7,7 @@ import shapefile
 from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
 from sklearn.preprocessing import StandardScaler
-from Route_Algo import min_span_tree
+from route_algo import min_span_tree
 
 baseDir = '../data/california/california/train'
 
@@ -111,10 +111,13 @@ def process_data(ca_sf, col_label, col_label_verbose, df, path='d_processed.txt'
             tdf.write(str(data))
     return data
 
+
 def sum_cluster(cluster_ids, cluster, data):
     if len(data) != len(cluster_ids):
         raise ValueError("data and cluster_ids must have identical lengths")
     return sum(data[i] for i in cluster_ids if i == cluster)
+
+
 
 jobs_employment = pd.read_csv('../jobs_data/Jobs_employment_2.csv', delimiter=';')
 jobs_data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, path='jobs_data.txt',
@@ -133,7 +136,7 @@ scaler = StandardScaler()
 n_o_j = np.array([jobs_data[i]['Number of Jobs'] for i in range(len(jobs_data))])
 n_o_j_scale = scaler.fit_transform(n_o_j.reshape(-1, 1))
 subset = [(jobs_data[i]['coord'][0], jobs_data[i]['coord'][1], n_o_j_scale[i]) for i in range(len(jobs_data))]
-print(scaler.transform(subset))
+
 n_clusters = 30
 job_kmeans = KMeans(n_clusters=n_clusters)
 job_predict = job_kmeans.fit_predict(subset)
@@ -145,10 +148,11 @@ subset_empl_edu = [(empl_data[i]['coord'][0], empl_data[i]['coord'][1], empl_dat
 empl_edu_kmean = KMeans(n_clusters=n_clusters)
 empl_predict = empl_edu_kmean.fit_predict(subset_empl_edu)
 
-sum_cluster(empl_predict, 2, emp_edu)
+cluster_sum_jobs, cluster_sum_employ_edu = [], []
 
-
-
+for i in range(n_clusters):
+    cluster_sum_employ_edu.append(sum_cluster(empl_predict, i, emp_edu)/sum(emp_edu))
+    cluster_sum_jobs.append(sum_cluster(job_predict, i, n_o_j)/sum(n_o_j))
 
 jobs_centres = job_kmeans.cluster_centers_
 emp_edu_centres = empl_edu_kmean.cluster_centers_

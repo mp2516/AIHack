@@ -1,5 +1,4 @@
 def find_flows(edges):
-
     flows = []
     for edge in edges:
         top = []
