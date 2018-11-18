@@ -142,7 +142,7 @@ empl_edu_kmean.fit(subset_empl_edu)
 
 jobs_centres = job_kmeans.cluster_centers_
 emp_edu_centres = empl_edu_kmean.cluster_centers_
-result= min_span_tree(jobs_centres, emp_edu_centres)
+result, all_coords = min_span_tree(jobs_centres, emp_edu_centres)
 plot_california()
 for i in range(len(result)):
     for j in range(len(result[i])):
