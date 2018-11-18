@@ -7,6 +7,7 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
 from heapq import heapify, heappush, heappop
 
+
 def calculate_distance(location_1, location_2):
     lat1 = location_1[0]
     lon1 = location_1[1]
@@ -16,22 +17,24 @@ def calculate_distance(location_1, location_2):
     a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
     return 12742 * asin(sqrt(a))
 
+
 def calculate_all_distances(Jobs, Workers):
-    all_nodes = Jobs + Workers
+    all_nodes = np.concatenate((Jobs, Workers))
     dimension = len(all_nodes)
     all_distances = np.zeros((dimension, dimension))
     for i in range(0, dimension):
-        for j in range(i+1, dimension):
+        for j in range(i + 1, dimension):
             all_distances[i][j] = calculate_distance(all_nodes[i], all_nodes[j])
     return all_distances
+
 
 # Mimimum Spanning Tree
 
 def min_span_tree(Jobs, Workers):
     all_distances = calculate_all_distances(Jobs, Workers)
     Tcsr = minimum_spanning_tree(all_distances)
-    Tcsr.toarray().astype(int)
-    return Tcsr
+    return Tcsr.toarray().astype(int)
+
 
 # Jobs = [
 #     [12.34, 34.65, 0.3],

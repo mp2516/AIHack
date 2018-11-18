@@ -7,6 +7,8 @@ import shapefile
 from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
 from sklearn.preprocessing import StandardScaler
+from Route_Algo import min_span_tree
+
 baseDir = '../data/california/california/train'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
@@ -56,6 +58,11 @@ def process_county_data(ca_sf, col_label, col_label_verbose, df, path='dc_proces
     population_data = pd.read_csv(os.path.join(baseDir, 'X00_COUNTS.csv'))
     population_data = population_data[['GEOID', 'B00001e1', 'B00001m1']]
     data = []
+    if os.path.exists(path):
+        with open(path) as pcdpf:
+            data = ast.literal_eval(pcdpf.read())
+            return data
+
     if not intrinsic:
         county_pop = {}
         for c_G_ID in df['GEOID']:
@@ -72,10 +79,12 @@ def process_county_data(ca_sf, col_label, col_label_verbose, df, path='dc_proces
             tract_pop = population_data[population_data['GEOID'].str.contains(GEOID, na=True)]['B00001e1'].sum(
                 skipna=True)
             tract_data[col_label_verbose] = float(tract_df[col_label].iloc[0].replace(',', '')) * (
-                        tract_pop / county_pop[f"15000US{county_GEOID}"])
+                    tract_pop / county_pop[f"15000US{county_GEOID}"])
         else:
             tract_data[col_label_verbose] = tract_df[col_label].iloc[0]
         data.append(tract_data)
+    with open(path, 'w') as pcdpf:
+        pcdpf.write(str(data))
     return data
 
 
@@ -104,7 +113,8 @@ def process_data(ca_sf, col_label, col_label_verbose, df, path='d_processed.txt'
 
 
 jobs_employment = pd.read_csv('../jobs_data/Jobs_employment_2.csv', delimiter=';')
-jobs_data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, intrinsic=False)
+jobs_data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, path='jobs_data.txt',
+                                intrinsic=False)
 # plot_california_counties()
 # plt.scatter([data[i]['coord'][0] for i in range(len(data))], [data[i]['coord'][1] for i in range(len(data))],
 #             c=[data[i]['Number of Jobs'] for i in range(len(data))], s=5)
@@ -117,21 +127,30 @@ n_o_j = np.array([jobs_data[i]['Number of Jobs'] for i in range(len(jobs_data))]
 n_o_j_scale = scaler.fit_transform(n_o_j.reshape(-1, 1))
 subset = [(jobs_data[i]['coord'][0], jobs_data[i]['coord'][1], n_o_j_scale[i]) for i in range(len(jobs_data))]
 print(scaler.transform(subset))
-n_clusters = 20
+n_clusters = 30
 job_kmeans = KMeans(n_clusters=n_clusters)
 job_kmeans.fit(subset)
 emp_end_df = pd.read_csv('../data_employment/Employment_Education_status.csv')
-empl_data = process_data(ca_tract_sf,'SIGNAL','Enployment/Education Status',emp_end_df,'emp_end.txt')
+empl_data = process_data(ca_tract_sf, 'SIGNAL', 'Enployment/Education Status', emp_end_df, 'emp_end.txt')
 emp_edu = np.array([empl_data[i]['Enployment/Education Status'] for i in range(len(empl_data))])
-empl_data_scale = scaler.fit_transform(emp_edu.reshape(-1,1))
-subset_empl_edu = [(empl_data[i]['coord'][0],empl_data[i]['coord'][1],empl_data_scale[i][0]) for i in range(len(empl_data))]
+empl_data_scale = scaler.fit_transform(emp_edu.reshape(-1, 1))
+subset_empl_edu = [(empl_data[i]['coord'][0], empl_data[i]['coord'][1], empl_data_scale[i][0]) for i in
+                   range(len(empl_data))]
 print(subset_empl_edu)
 empl_edu_kmean = KMeans(n_clusters=n_clusters)
 empl_edu_kmean.fit(subset_empl_edu)
 
-jobs_centres =job_kmeans.cluster_centers_()
-emp_edu_centres = empl_edu_kmean.cluster_centers_()
+jobs_centres = job_kmeans.cluster_centers_
+emp_edu_centres = empl_edu_kmean.cluster_centers_
+result= min_span_tree(jobs_centres, emp_edu_centres)
+plot_california()
+for i in range(len(result)):
+    for j in range(len(result[i])):
+        if result[i][j] == 0:
+            continue
 
+        plt.plot((jobs_centres[i][0] if i < n_clusters else emp_edu_centres[i-n_clusters][0], jobs_centres[j][0] if j < n_clusters else emp_edu_centres[j-n_clusters][0]),
+                 (jobs_centres[i][1] if i < n_clusters else emp_edu_centres[i-n_clusters][1], jobs_centres[j][1] if j < n_clusters else emp_edu_centres[j-n_clusters][1]), 'b-')
 # for i in range(10):
 #     mean_employment_score = np.mean([emp_edu[j] for j in range(len(emp_edu)) if cluster_indice_empl[j] == i])
 #     plt.scatter([subset_empl_edu[j][0] for j in range(len(subset_empl_edu)) if cluster_indice_empl[j] == i],
@@ -139,11 +158,10 @@ emp_edu_centres = empl_edu_kmean.cluster_centers_()
 #                 label=f"Mean Education:${mean_employment_score:.5f}",
 #                 s=5)
 #
-
+#
 plt.xlim((-120, -116))
 plt.ylim((33, 35))
 plt.axis('equal')
-plt.legend()
 plt.show()
 # # km.iterate(100)
 # plot_california()
