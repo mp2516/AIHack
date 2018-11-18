@@ -2,6 +2,7 @@
 
 from collections import deque, defaultdict
 import numpy as np
+from math import cos, asin, sqrt
 
 Jobs = [
     {12.34, 34.65, 0.3},
@@ -19,8 +20,14 @@ from heapq import heapify, heappush, heappop
 
 
 def calculate_distance(location_1, location_2):
-    # Calculate
-    return np.sqrt((location_1[0] - location_2[0]) ** 2 + (location_1[1] - location_2[1]) ** 2)
+    lat1 = location_1[0]
+    lon1 = location_1[1]
+    lat2 = location_2[0]
+    lon2 = location_2[1]
+    p = 0.017453292519943295     #Pi/180
+    a = 0.5 - cos((lat2 - lat1) * p)/2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
+    return 12742 * asin(sqrt(a))
+    #return np.sqrt((location_1[0] - location_2[0]) ** 2 + (location_1[1] - location_2[1]) ** 2)
 
 
 def calculate_all_distances(Jobs, Workers):
