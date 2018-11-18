@@ -3,21 +3,9 @@
 from collections import deque, defaultdict
 import numpy as np
 from math import cos, asin, sqrt
-
-Jobs = [
-    {12.34, 34.65, 0.3},
-    {34.57, 23.76, 0.4},
-    {23.56, 29.86, 0.3}]
-
-Workers = [
-    {12.34, 32.65, 0.1},
-    {39.57, 21.76, 0.2},
-    {37.57, 26.76, 0.4},
-    {34.57, 27.76, 0.4},
-    {21.56, 32.86, 0.3}]
-
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import minimum_spanning_tree
 from heapq import heapify, heappush, heappop
-
 
 def calculate_distance(location_1, location_2):
     lat1 = location_1[0]
@@ -27,20 +15,24 @@ def calculate_distance(location_1, location_2):
     p = 0.017453292519943295  # Pi/180
     a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
     return 12742 * asin(sqrt(a))
+<<<<<<< Updated upstream
     # return np.sqrt((location_1[0] - location_2[0]) ** 2 + (location_1[1] - location_2[1]) ** 2)
 
+=======
+>>>>>>> Stashed changes
 
 def calculate_all_distances(Jobs, Workers):
     all_nodes = Jobs + Workers
     dimension = len(all_nodes)
     all_distances = np.zeros((dimension, dimension))
     for i in range(0, dimension):
-        for j in range(0, dimension):
-            all_distances[i][j] = calculate_distance(all_nodes(i), all_nodes(j))
-
+        for j in range(i+1, dimension):
+            all_distances[i][j] = calculate_distance(all_nodes[i], all_nodes[j])
+    return all_distances
 
 # Mimimum Spanning Tree
 
+<<<<<<< Updated upstream
 def kruskal_heap(G):
     T = set()  # MST as a set of edges
     subgraphs = {u: {u} for u in range(len(G))}  # Initialize subgraphs
@@ -65,10 +57,33 @@ g1 = [
     {sfo: 1846},  # ORD
     {}  # SFO
 ]
+=======
+>>>>>>> Stashed changes
 
-print(kruskal_heap(g2))
+def min_span_tree(Jobs, Workers):
+    all_distances = calculate_all_distances(Jobs, Workers)
+    Tcsr = minimum_spanning_tree(all_distances)
+    Tcsr.toarray().astype(int)
+    print(Tcsr)
+
+Jobs = [
+    [12.34, 34.65, 0.3],
+    [34.57, 23.76, 0.4],
+    [23.56, 29.86, 0.3]]
+
+Workers = [
+    [12.34, 32.65, 0.1],
+    [39.57, 21.76, 0.2],
+    [37.57, 26.76, 0.4],
+    [34.57, 27.76, 0.4],
+    [21.56, 32.86, 0.3]]
+
+result = min_span_tree(Jobs,Workers)
+print(result)
 
 ######### FLOW NETWORK: FORD FOLKERSON
+
+"""
 
 inf = float('inf')
 
@@ -85,7 +100,6 @@ def residual(G, x):
                 if cap - x[u, v]: Gf[u].update({v: cap - x[u, v]})
                 if x[u, v]: Gf[v].update({u: x[u, v]})
     return Gf
-
 
 def aug_paths(G, s, t, x):  # Walk the graph from node s, x is a flow
     '''This function determines if there is an augmenting path betweeen
@@ -139,3 +153,5 @@ g1 = [
 res_flow = ford_fulkerson(g1, one, four)
 print(res_flow)
 print("\n")
+
+"""
