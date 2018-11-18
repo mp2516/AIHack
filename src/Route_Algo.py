@@ -6,7 +6,7 @@ from math import cos, asin, sqrt
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import minimum_spanning_tree
 from heapq import heapify, heappush, heappop
-
+from weights import find_flows
 
 def calculate_distance(location_1, location_2):
     lat1 = location_1[0]
@@ -18,15 +18,15 @@ def calculate_distance(location_1, location_2):
     return 12742 * asin(sqrt(a))
 
 
-def calculate_all_distances(Jobs, Workers):
+def calculate_all_distances(Jobs, Workers,all_weights):
     all_nodes = np.concatenate((Jobs, Workers))
     dimension = len(all_nodes)
 
     all_coords = np.zeros((dimension, 3))
     for i in range(0, dimension):
-        all_coords[i,0] = all_nodes[i,0]
-        all_coords[i,1] = all_nodes[i,1]
-        all_coords[i,2] = 0 #all_nodes[i,2] #This needs to go back in
+        all_coords[i, 0] = all_nodes[i, 0]
+        all_coords[i, 1] = all_nodes[i, 1]
+        all_coords[i, 2] = all_weights[i]  # all_nodes[i,2] #This needs to go back in
 
     all_distances = np.zeros((dimension, dimension))
     for i in range(0, dimension):
@@ -34,10 +34,12 @@ def calculate_all_distances(Jobs, Workers):
             all_distances[i][j] = calculate_distance(all_nodes[i], all_nodes[j])
     return all_distances, all_coords
 
+
 # Mimimum Spanning Tree
 
-def min_span_tree(Jobs, Workers):
-    all_distances, all_coords = calculate_all_distances(Jobs, Workers)
+def min_span_tree(Jobs, Workers, job_weights, worker_weights):
+    all_weights = np.concatenate(job_weights, worker_weights)
+    all_distances, all_coords = calculate_all_distances(Jobs, Workers,all_weights)
     Tcsr = minimum_spanning_tree(all_distances)
     return Tcsr.toarray().astype(int), all_coords
 
