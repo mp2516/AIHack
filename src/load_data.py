@@ -8,8 +8,9 @@ from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
 from sklearn.preprocessing import StandardScaler
 from route_algo import min_span_tree
+from Cali_map import city_labels
 
-baseDir = '../data'
+baseDir = '../data/california/california/train'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
 
@@ -28,7 +29,7 @@ def plot_california_counties():
         for j in range(len(county_shape.points)):
             x_points[j] = county_shape.points[j][0]
             y_points[j] = county_shape.points[j][1]
-        plt.plot(x_points, y_points, 'k')
+        plt.plot(x_points, y_points, 'k',alpha=0.1)
 
 
 def plot_california():
@@ -119,11 +120,10 @@ def sum_cluster(cluster_ids, cluster, data):
     return sum(data[i] for i in cluster_ids if i == cluster)
 
 
-
-jobs_employment = pd.read_csv('../jobs_data/Jobs_employment_2.csv', delimiter=';')
+jobs_employment = pd.read_csv('../data/Jobs_employment_2.csv', delimiter=';')
 jobs_data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, path='jobs_data.txt',
                                 intrinsic=False)
-emp_end_df = pd.read_csv('../data_employment/Employment_Education_status.csv')
+emp_end_df = pd.read_csv('../data/Employment_Education_status.csv')
 empl_data = process_data(ca_tract_sf, 'SIGNAL', 'Employment/Education Status', emp_end_df, 'emp_end.txt')
 
 # plot_california_counties()
@@ -138,7 +138,7 @@ n_o_j = np.array([jobs_data[i]['Number of Jobs'] for i in range(len(jobs_data))]
 n_o_j_scale = scaler.fit_transform(n_o_j.reshape(-1, 1))
 subset = [(jobs_data[i]['coord'][0], jobs_data[i]['coord'][1], n_o_j_scale[i]) for i in range(len(jobs_data))]
 
-n_clusters = 30
+n_clusters = 8
 job_kmeans = KMeans(n_clusters=n_clusters)
 job_predict = job_kmeans.fit_predict(subset)
 
@@ -152,14 +152,13 @@ empl_predict = empl_edu_kmean.fit_predict(subset_empl_edu)
 cluster_sum_jobs, cluster_sum_employ_edu = [], []
 
 for i in range(n_clusters):
-    cluster_sum_employ_edu.append(sum_cluster(empl_predict, i, emp_edu)/sum(emp_edu))
-    cluster_sum_jobs.append(sum_cluster(job_predict, i, n_o_j)/sum(n_o_j))
+    cluster_sum_employ_edu.append(sum_cluster(empl_predict, i, emp_edu) / sum(emp_edu))
+    cluster_sum_jobs.append(sum_cluster(job_predict, i, n_o_j) / sum(n_o_j))
 
 jobs_centres = job_kmeans.cluster_centers_
 emp_edu_centres = empl_edu_kmean.cluster_centers_
-result, all_coords = min_span_tree(jobs_centres, emp_edu_centres)
+result, all_coords = min_span_tree(jobs_centres, emp_edu_centres,cluster_sum_jobs,cluster_sum_employ_edu)
 
-print(all_coords)
 
 plot_california()
 for i in range(len(result)):
@@ -172,18 +171,38 @@ for i in range(len(result)):
                  (jobs_centres[i][1] if i < n_clusters else emp_edu_centres[i - n_clusters][1],
                   jobs_centres[j][1] if j < n_clusters else emp_edu_centres[j - n_clusters][1]), 'b-')
 
-# for i in range(10):
-#     mean_employment_score = np.mean([emp_edu[j] for j in range(len(emp_edu)) if cluster_indice_empl[j] == i])
-#     plt.scatter([subset_empl_edu[j][0] for j in range(len(subset_empl_edu)) if cluster_indice_empl[j] == i],
-#                 [subset_empl_edu[j][1] for j in range(len(subset_empl_edu)) if cluster_indice_empl[j] == i],
-#                 label=f"Mean Education:${mean_employment_score:.5f}",
-#                 s=5)
-#
-#
+for i in range(n_clusters):
+    mean_jobs = np.mean([n_o_j[j] for j in range(len(n_o_j)) if job_predict[j] == i])
+    plt.scatter([subset[j][0] for j in range(len(subset)) if job_predict[j] == i],
+                [subset[j][1] for j in range(len(subset)) if job_predict[j] == i],
+                label=f"Mean No. Jobs:{mean_jobs:.0f}",
+                s=4.5)
+
+
+#city_labels()
+plt.legend()
+plt.gca().set_xlabel("Longitude")
+plt.gca().set_ylabel("Latitude")
 plt.xlim((-120, -116))
 plt.ylim((33, 35))
 plt.axis('equal')
 plt.show()
+plot_california()
+plot_california_counties()
+for i in range(n_clusters):
+    mean_employment_score= np.mean([emp_edu[j] for j in range(len(emp_edu)) if empl_predict[j] == i])
+    plt.scatter([subset_empl_edu[j][0] for j in range(len(subset_empl_edu)) if empl_predict[j] == i],
+                [subset_empl_edu[j][1] for j in range(len(subset_empl_edu)) if empl_predict[j] == i],
+                label=f"Mean Employment Score:{mean_employment_score:.5f}",
+                s=4.5)
+plt.legend()
+plt.gca().set_xlabel("Longitude")
+plt.gca().set_ylabel("Latitude")
+plt.xlim((-120, -116))
+plt.ylim((33, 35))
+plt.axis('equal')
+plt.show()
+
 # # km.iterate(100)
 # plot_california()
 # for i in range(km.num_clusters):
