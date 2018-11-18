@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from tqdm import trange
 import math
+import networkx as nx
 import shapefile
 from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
@@ -10,17 +11,17 @@ from sklearn.preprocessing import StandardScaler
 from route_algo import min_span_tree
 from Cali_map import city_labels
 
-baseDir = '../data/california/california/train'
+baseDir = '..\\data\\data\\california\\california\\train'
 
 # meta_data = pd.read_csv(os.path.join(baseDir,'BG_METADATA_2016.csv'))
 
 # counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
 counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
-ca_tract_sf = shapefile.Reader('../data/tl_2018_06_bg')
+ca_tract_sf = shapefile.Reader('../data/data/tl_2018_06_bg')
 
 
 def plot_california_counties():
-    ca_counties_sf = shapefile.Reader('../data/tl_2018_us_county')
+    ca_counties_sf = shapefile.Reader('../data/data/tl_2018_us_county')
     for i in range(len(ca_counties_sf.shapes())):
         if (ca_counties_sf.record(i)[0] != '06'): continue
         county_shape = ca_counties_sf.shape(i)
@@ -34,7 +35,7 @@ def plot_california_counties():
 
 def plot_california():
     # Plot california
-    us_sf = shapefile.Reader('../data/tl_2018_us_state')
+    us_sf = shapefile.Reader('../data/data/tl_2018_us_state')
     california_shape = us_sf.shape(13)
     x_cali = np.zeros((len(california_shape.points), 1))
     y_cali = np.zeros((len(california_shape.points), 1))
@@ -120,10 +121,10 @@ def sum_cluster(cluster_ids, cluster, data):
     return sum(data[i] for i in cluster_ids if i == cluster)
 
 
-jobs_employment = pd.read_csv('../data/Jobs_employment_2.csv', delimiter=';')
+jobs_employment = pd.read_csv('../data/data/Jobs_employment_2.csv', delimiter=';')
 jobs_data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, path='jobs_data.txt',
                                 intrinsic=False)
-emp_end_df = pd.read_csv('../data/Employment_Education_status.csv')
+emp_end_df = pd.read_csv('../data/data/Employment_Education_status.csv')
 empl_data = process_data(ca_tract_sf, 'SIGNAL', 'Employment/Education Status', emp_end_df, 'emp_end.txt')
 
 # plot_california_counties()
@@ -211,3 +212,28 @@ plt.show()
 # plt.show()
 #
 # # print(race_data['GEOID'])
+
+mst = nx.DiGraph()
+
+n = 0
+for pos in all_coords:
+    mst.add_node(n, pos=(pos[0], pos[1]), value=pos[2])
+    n+=1
+
+nx.draw(mst)
+
+num_row = 0
+num_col = 0
+for row in result:
+    for dist in row:
+        mst.add_edge(num_row, num_col, weight=dist)
+        num_col += 1
+    num_row += 1
+
+# mst_edges = []
+# for i in range(len(mst.nodes()) - 1):
+#     mst_edges.append([[mst.nodes[i]['coord'][0], mst.nodes[i]['coord'][1], mst.nodes[i]['value']], [mst.nodes[i+1]['coord'][0], mst['coord'][i+1], mst.nodes[i+1]['value']]])
+
+nx.draw(mst)
+plt.show()
+

@@ -18,7 +18,7 @@ def calculate_distance(location_1, location_2):
     return 12742 * asin(sqrt(a))
 
 
-def calculate_all_distances(Jobs, Workers,all_weights):
+def calculate_all_distances(Jobs, Workers, all_weights):
     all_nodes = np.concatenate((Jobs, Workers))
     dimension = len(all_nodes)
 
@@ -38,7 +38,7 @@ def calculate_all_distances(Jobs, Workers,all_weights):
 # Mimimum Spanning Tree
 
 def min_span_tree(Jobs, Workers, job_weights, worker_weights):
-    all_weights = np.concatenate(job_weights, worker_weights)
+    all_weights = np.concatenate((job_weights, worker_weights))
     all_distances, all_coords = calculate_all_distances(Jobs, Workers,all_weights)
     Tcsr = minimum_spanning_tree(all_distances)
     return Tcsr.toarray().astype(int), all_coords
