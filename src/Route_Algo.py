@@ -42,14 +42,6 @@ def min_span_tree(Jobs, Workers):
     return Tcsr.toarray().astype(int), all_coords
 
 
- Workers = [
-     [12.34, 32.65, 0.1],
-     [39.57, 21.76, 0.2],
-     [37.57, 26.76, 0.4],
-     [34.57, 27.76, 0.4],
-     [21.56, 32.86, 0.3]]
-
-print(min_span_tree(Jobs, Workers))
 ######### FLOW NETWORK: FORD FOLKERSON
 
 """
