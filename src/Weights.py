@@ -68,21 +68,3 @@ def find_flows(edges):
         edges[n].append(flows[n])
 
     return edges
-
-edg1 = [1,1,1]
-edg2 = [2,3,3]
-edg3 = [3,1,-2]
-edg4 = [4,5,5]
-edg5 = [5,4,-4]
-edg6 = [6,1,1]
-edg7 = [7,4,-4]
-
-edge1 = [edg1,edg5]
-edge2 = [edg5,edg3]
-edge3 = [edg2,edg5]
-edge4 = [edg4,edg5]
-edge5 = [edg5,edg6]
-edge6 = [edg6,edg7]
-
-
-print(find_flows([edge1,edge2,edge3,edge4,edge5,edge6]))

@@ -3,10 +3,6 @@ from tqdm import trange
 
 
 def distance_sq(a, b):
-    """
-    It does what it says on the tin
-    """
-    # ARE YOU HAPPY NOW?
     if len(a) != len(b):
         raise ValueError("A and b must have identical dimensions")
     return sum(((a[i] - b[i])**2 for i in range(len(a))))

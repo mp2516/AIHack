@@ -9,12 +9,12 @@ from heapq import heapify, heappush, heappop
 from weights import find_flows
 
 def calculate_distance(location_1, location_2):
-    lat1 = location_1[0]
-    lon1 = location_1[1]
-    lat2 = location_2[0]
-    lon2 = location_2[1]
+    lat1 = location_1[1]
+    lon1 = location_1[0]
+    lat2 = location_2[1]
+    lon2 = location_2[0]
     p = 0.017453292519943295  # Pi/180
-    a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
+    a = np.sin(p*(lat1-lat2)/2)**2 + np.cos(p*lat1)*np.cos(p*lat2)*(np.sin(p*(lon1 - lon2)/2)**2)
     return 12742 * asin(sqrt(a))
 
 
@@ -32,13 +32,14 @@ def calculate_all_distances(Jobs, Workers,all_weights):
     for i in range(0, dimension):
         for j in range(i + 1, dimension):
             all_distances[i][j] = calculate_distance(all_nodes[i], all_nodes[j])
+
     return all_distances, all_coords
 
 
 # Mimimum Spanning Tree
 
 def min_span_tree(Jobs, Workers, job_weights, worker_weights):
-    all_weights = np.concatenate(job_weights, worker_weights)
+    all_weights = np.concatenate((job_weights, worker_weights))
     all_distances, all_coords = calculate_all_distances(Jobs, Workers,all_weights)
     Tcsr = minimum_spanning_tree(all_distances)
     return Tcsr.toarray().astype(int), all_coords
