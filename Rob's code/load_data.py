@@ -72,7 +72,8 @@ def process_county_data(ca_sf, col_label, col_label_verbose, df, path='dc_proces
         if not intrinsic:
             tract_pop = population_data[population_data['GEOID'].str.contains(GEOID, na=True)]['B00001e1'].sum(
                 skipna=True)
-            tract_data[col_label_verbose] = float(tract_df[col_label].iloc[0].replace(',','')) * (tract_pop / county_pop[f"15000US{county_GEOID}"])
+            tract_data[col_label_verbose] = float(tract_df[col_label].iloc[0].replace(',', '')) * (
+                        tract_pop / county_pop[f"15000US{county_GEOID}"])
         else:
             tract_data[col_label_verbose] = tract_df[col_label].iloc[0]
         data.append(tract_data)
@@ -104,12 +105,12 @@ def process_data(ca_sf, col_label, col_label_verbose, df, path='d_processed.txt'
 
 
 jobs_employment = pd.read_csv('../jobs_data/Jobs_employment_2.csv', delimiter=';')
-data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment,intrinsic=False)
+data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, intrinsic=False)
 print(data)
 plot_california_counties()
-plt.scatter([data[i]['coord'][0] for i in range(len(data))],[data[i]['coord'][1] for i in range(len(data))],c = [data[i]['Number of Jobs'] for i in range(len(data))],s=5)
+plt.scatter([data[i]['coord'][0] for i in range(len(data))], [data[i]['coord'][1] for i in range(len(data))],
+            c=[data[i]['Number of Jobs'] for i in range(len(data))], s=5)
 plt.show()
-#
 # data = process_data(ca_tract_sf, 'B19013e1', 'income', counts_data)
 # plt.figure(figsize=(6, 8))
 # plot_california_counties()
