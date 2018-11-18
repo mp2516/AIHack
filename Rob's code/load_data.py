@@ -107,38 +107,40 @@ def process_data(ca_sf, col_label, col_label_verbose, df, path='d_processed.txt'
 jobs_employment = pd.read_csv('../jobs_data/Jobs_employment_2.csv', delimiter=';')
 data = process_county_data(ca_tract_sf, 'Number of Jobs', 'Number of Jobs', jobs_employment, intrinsic=False)
 print(data)
-plot_california_counties()
-plt.scatter([data[i]['coord'][0] for i in range(len(data))], [data[i]['coord'][1] for i in range(len(data))],
-            c=[data[i]['Number of Jobs'] for i in range(len(data))], s=5)
-plt.show()
-# data = process_data(ca_tract_sf, 'B19013e1', 'income', counts_data)
-# plt.figure(figsize=(6, 8))
 # plot_california_counties()
-# scaler = StandardScaler()
-# income = np.array([data[i]['income'] for i in range(len(data))])
-# income_scale = scaler.fit_transform(income.reshape(-1, 1))
-# subset = [(data[i]['coord'][0], data[i]['coord'][1], income_scale[i]) for i in range(len(data))]
-# print(scaler.transform(subset))
-# n_clusters = 6
-# kmeans = KMeans(n_clusters=n_clusters)
-# km = kmeans.fit_predict(scaler.transform(subset))
-#
-# for i in range(n_clusters):
-#     mean_income = np.mean([income[j] for j in range(len(income)) if km[j] == i])
-#     plt.scatter([subset[j][0] for j in range(len(subset)) if km[j] == i],
-#                 [subset[j][1] for j in range(len(subset)) if km[j] == i],
-#                 label=f"Mean Income:${mean_income:.2f}",
-#                 s=5)
-# plt.xlim((-120, -116))
-# plt.ylim((33, 35))
-# plt.axis('equal')
+# plt.scatter([data[i]['coord'][0] for i in range(len(data))], [data[i]['coord'][1] for i in range(len(data))],
+#             c=[data[i]['Number of Jobs'] for i in range(len(data))], s=5)
+# plt.show()
+# data = process_data(ca_tract_sf, 'B19013e1', 'income', counts_data)
+plt.figure(figsize=(6, 8))
+plot_california_counties()
+scaler = StandardScaler()
+n_o_j = np.array([data[i]['Number of Jobs'] for i in range(len(data))])
+n_o_j_scale = scaler.fit_transform(n_o_j.reshape(-1, 1))
+subset = [(data[i]['coord'][0], data[i]['coord'][1], n_o_j_scale[i]) for i in range(len(data))]
+print(scaler.transform(subset))
+n_clusters = 20
+kmeans = KMeans(n_clusters=n_clusters)
+km = kmeans.fit_predict(scaler.transform(subset))
+
+for i in range(n_clusters):
+    mean_jobs = np.mean([n_o_j[j] for j in range(len(n_o_j)) if km[j] == i])
+    plt.scatter([subset[j][0] for j in range(len(subset)) if km[j] == i],
+                [subset[j][1] for j in range(len(subset)) if km[j] == i],
+                label=f"Mean Income:${mean_jobs:.2f}",
+                s=5)
+
+
+plt.xlim((-120, -116))
+plt.ylim((33, 35))
+plt.axis('equal')
+plt.legend()
+plt.show()
+# km.iterate(100)
+# plot_california()
+# for i in range(km.num_clusters):
+#     plt.scatter(km.get_x_cluster(i), km.get_y_cluster(i), label=f"Cluster {i}")
 # plt.legend()
 # plt.show()
-# # km.iterate(100)
-# # plot_california()
-# # for i in range(km.num_clusters):
-# #     plt.scatter(km.get_x_cluster(i), km.get_y_cluster(i), label=f"Cluster {i}")
-# # plt.legend()
-# # plt.show()
-# #
-# # # print(race_data['GEOID'])
+#
+# # print(race_data['GEOID'])

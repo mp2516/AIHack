@@ -24,10 +24,10 @@ def calculate_distance(location_1, location_2):
     lon1 = location_1[1]
     lat2 = location_2[0]
     lon2 = location_2[1]
-    p = 0.017453292519943295     #Pi/180
-    a = 0.5 - cos((lat2 - lat1) * p)/2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
+    p = 0.017453292519943295  # Pi/180
+    a = 0.5 - cos((lat2 - lat1) * p) / 2 + cos(lat1 * p) * cos(lat2 * p) * (1 - cos((lon2 - lon1) * p)) / 2
     return 12742 * asin(sqrt(a))
-    #return np.sqrt((location_1[0] - location_2[0]) ** 2 + (location_1[1] - location_2[1]) ** 2)
+    # return np.sqrt((location_1[0] - location_2[0]) ** 2 + (location_1[1] - location_2[1]) ** 2)
 
 
 def calculate_all_distances(Jobs, Workers):
@@ -43,7 +43,6 @@ def calculate_all_distances(Jobs, Workers):
 
 def kruskal_heap(G):
     T = set()  # MST as a set of edges
-    subgraphs = dict()  # Dict of subgraphs, just nodes
     subgraphs = {u: {u} for u in range(len(G))}  # Initialize subgraphs
     E = [(G[u][v], u, v) for u in range(len(G)) for v in G[u]]  # List of edges with weight
     heapify(E)
