@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from tqdm import trange
 import math
+import networkx as nx
 import shapefile
 from matplotlib import pyplot as plt
 from sklearn.cluster.k_means_ import KMeans
@@ -16,7 +17,6 @@ baseDir = '../data/california/california/train'
 
 # counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
 counts_data = pd.read_csv(os.path.join(baseDir, 'X19_INCOME.csv'))
-commuting_data = pd.read_csv(os.path.join(baseDir, 'X08_COMMUTING.csv'))
 ca_tract_sf = shapefile.Reader('../data/tl_2018_06_bg')
 
 
@@ -47,7 +47,7 @@ def plot_california():
     plt.scatter(x_cali, y_cali, s=0.2)
 
 
-def process_county_data(ca_sf, df, col_label, col_label_verbose, path='dc_processed.txt', intrinsic=True):
+def process_county_data(ca_sf, col_label, col_label_verbose, df, path='dc_processed.txt', intrinsic=True):
     """
     Function for processing county data - more zoomed out than tract dataset - use interpolation if not intrisinic
     :param ca_sf:
@@ -221,3 +221,28 @@ def plot_employment_edu_cluster(n_clusters, no_edu, subset_edu, kmeans=None):
 
 for i in np.arange(5,100,5):
     plot_network(int(i),subset,subset_empl_edu,n_o_j,emp_edu)
+
+mst = nx.DiGraph()
+
+n = 0
+for pos in all_coords:
+    mst.add_node(n, pos=(pos[0], pos[1]), value=pos[2])
+    n+=1
+
+nx.draw(mst)
+
+num_row = 0
+num_col = 0
+for row in result:
+    for dist in row:
+        mst.add_edge(num_row, num_col, weight=dist)
+        num_col += 1
+    num_row += 1
+
+# mst_edges = []
+# for i in range(len(mst.nodes()) - 1):
+#     mst_edges.append([[mst.nodes[i]['coord'][0], mst.nodes[i]['coord'][1], mst.nodes[i]['value']], [mst.nodes[i+1]['coord'][0], mst['coord'][i+1], mst.nodes[i+1]['value']]])
+
+nx.draw(mst)
+plt.show()
+

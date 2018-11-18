@@ -18,7 +18,7 @@ def calculate_distance(location_1, location_2):
     return 12742 * asin(sqrt(a))
 
 
-def calculate_all_distances(Jobs, Workers,all_weights):
+def calculate_all_distances(Jobs, Workers, all_weights):
     all_nodes = np.concatenate((Jobs, Workers))
     dimension = len(all_nodes)
 
